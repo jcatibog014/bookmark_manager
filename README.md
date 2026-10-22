@@ -3,6 +3,8 @@
 A modern, fast bookmark manager that runs entirely in your browser. Save links with titles, notes, tags and
 collections, star your favorites, and find anything in seconds with fuzzy search and filters.
 
+**Live demo: https://jcatibog014.github.io/bookmark_manager/**
+
 ![Home, light theme](docs/screenshots/home-light.png)
 
 | Quick search (`Ctrl+K`) | Duplicate detection | Dark theme · list view |
@@ -74,7 +76,12 @@ Click **Load sample bookmarks** on the empty screen to explore with example data
 | `npm run dev` | Start the dev server with hot reload |
 | `npm test` | Run the unit tests once (`npm run test:watch` to keep them running) |
 | `npm run build` | Type-check and build for production into `dist/` |
-| `npm run preview` | Serve the production build locally |
+| `npm run preview` | Serve the production build locally (http://localhost:4173/bookmark_manager/) |
+
+## Deployment
+
+Every push to `main` runs the tests, builds the app and publishes it to GitHub Pages through
+[.github/workflows/deploy.yml](.github/workflows/deploy.yml).
 
 ## How it's built
 
