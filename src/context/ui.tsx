@@ -40,6 +40,11 @@ interface UIContextValue {
   toasts: Toast[];
   toast: (message: string, options?: Partial<Omit<Toast, 'id' | 'message'>>) => void;
   dismissToast: (id: number) => void;
+
+  paletteOpen: boolean;
+  setPaletteOpen: (open: boolean) => void;
+  helpOpen: boolean;
+  setHelpOpen: (open: boolean) => void;
 }
 
 const UIContext = createContext<UIContextValue | null>(null);
@@ -55,6 +60,8 @@ export function UIProvider({ children }: { children: ReactNode }) {
   );
   const [editor, setEditor] = useState<EditorState | null>(null);
   const [toasts, setToasts] = useState<Toast[]>([]);
+  const [paletteOpen, setPaletteOpen] = useState(false);
+  const [helpOpen, setHelpOpen] = useState(false);
   const nextId = useRef(1);
 
   const setViewMode = useCallback((mode: ViewMode) => {
@@ -103,6 +110,10 @@ export function UIProvider({ children }: { children: ReactNode }) {
       toasts,
       toast,
       dismissToast,
+      paletteOpen,
+      setPaletteOpen,
+      helpOpen,
+      setHelpOpen,
     }),
     [
       theme,
@@ -118,6 +129,8 @@ export function UIProvider({ children }: { children: ReactNode }) {
       toasts,
       toast,
       dismissToast,
+      paletteOpen,
+      helpOpen,
     ],
   );
 

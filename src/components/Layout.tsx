@@ -1,12 +1,22 @@
 import { Outlet } from 'react-router-dom';
 import { useUI } from '../context/ui';
+import { useHotkeys } from '../hooks/useHotkeys';
 import BookmarkForm from './BookmarkForm';
+import CommandPalette from './CommandPalette';
 import Sidebar from './Sidebar';
 import Toaster from './Toaster';
 import TopBar from './TopBar';
 
 export default function Layout() {
-  const { editor } = useUI();
+  const { editor, openEditor, paletteOpen, setPaletteOpen, setHelpOpen } = useUI();
+
+  useHotkeys({
+    'mod+k': () => setPaletteOpen(!paletteOpen),
+    n: () => openEditor(),
+    '/': () => document.getElementById('global-search')?.focus(),
+    '?': () => setHelpOpen(true),
+  });
+
   return (
     <div className="flex h-dvh overflow-hidden">
       <Sidebar />
@@ -17,6 +27,7 @@ export default function Layout() {
         </main>
       </div>
       {editor && <BookmarkForm key={editor.key} editor={editor} />}
+      {paletteOpen && <CommandPalette />}
       <Toaster />
     </div>
   );
