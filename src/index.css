@@ -77,6 +77,26 @@
   @apply inline-flex size-9 items-center justify-center rounded-xl text-zinc-500 transition outline-none hover:bg-zinc-100 hover:text-zinc-900 focus-visible:ring-4 focus-visible:ring-indigo-500/25 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-100;
 }
 
+/* Colorful gradient border: set --g1, --g2, --g3 inline. The inner layer paints
+   the card background, the outer layer shows through the transparent border. */
+@utility gradient-border {
+  --card-bg: #ffffff;
+  border: 2px solid transparent;
+  background:
+    linear-gradient(var(--card-bg), var(--card-bg)) padding-box,
+    linear-gradient(135deg, var(--g1), var(--g2), var(--g3)) border-box;
+
+  &[data-selected='true'] {
+    --card-bg: #eef2ff;
+  }
+  @variant dark {
+    --card-bg: #18181b;
+    &[data-selected='true'] {
+      --card-bg: color-mix(in oklab, #6366f1 15%, #18181b);
+    }
+  }
+}
+
 @utility kbd {
   @apply inline-flex min-w-5 items-center justify-center rounded-md border border-zinc-200 bg-zinc-50 px-1.5 font-sans text-[11px] font-medium text-zinc-500 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-400;
 }

@@ -1,9 +1,9 @@
 import clsx from 'clsx';
 import { Check, Copy, Folder, Pencil, Star, Trash } from 'lucide-react';
-import type { KeyboardEvent, MouseEvent } from 'react';
+import type { CSSProperties, KeyboardEvent, MouseEvent } from 'react';
 import type { ViewMode } from '../context/ui';
 import { useBookmarkActions } from '../hooks/useBookmarkActions';
-import { TEXT_CLASS } from '../lib/colors';
+import { gradientColors, TEXT_CLASS } from '../lib/colors';
 import { timeAgo } from '../lib/format';
 import type { BookmarkView } from '../lib/library';
 import { matchRanges, type SearchResult } from '../lib/search';
@@ -199,8 +199,21 @@ export default function BookmarkCard({
   );
 
   if (mode === 'grid') {
+    // Border gradient built from the card's own tag and collection colors.
+    const [g1, g2, g3] = gradientColors([
+      ...bookmark.tags.map((t) => t.color),
+      ...(bookmark.collection ? [bookmark.collection.color] : []),
+    ]);
     return (
-      <article {...shared} className={clsx(surface, 'flex flex-col rounded-2xl border p-4 shadow-xs hover:shadow-md')}>
+      <article
+        {...shared}
+        data-selected={selected}
+        style={{ '--g1': g1, '--g2': g2, '--g3': g3 } as CSSProperties}
+        className={clsx(
+          'gradient-border group relative flex cursor-default flex-col rounded-2xl p-4 shadow-xs outline-none transition hover:-translate-y-0.5 hover:shadow-lg focus-visible:ring-4 focus-visible:ring-indigo-500/25',
+          selected && 'ring-2 ring-indigo-500/40',
+        )}
+      >
         <div className="flex items-start gap-3">
           {icon}
           <div className="flex min-w-0 flex-1 flex-col gap-0.5 pt-0.5">
