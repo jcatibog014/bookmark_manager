@@ -43,6 +43,28 @@ export const TEXT_CLASS: Record<ColorName, string> = {
   pink: 'text-pink-500',
 };
 
+/** Hex values (Tailwind 500 shades) for inline styles such as gradients. */
+export const HEX: Record<ColorName, string> = {
+  slate: '#64748b',
+  red: '#ef4444',
+  orange: '#f97316',
+  amber: '#f59e0b',
+  emerald: '#10b981',
+  teal: '#14b8a6',
+  sky: '#0ea5e9',
+  indigo: '#6366f1',
+  violet: '#8b5cf6',
+  pink: '#ec4899',
+};
+
+const GRADIENT_FALLBACK: ColorName[] = ['indigo', 'violet', 'pink', 'amber'];
+
+/** Three distinct colors for a gradient: the given ones first, topped up from a default palette. */
+export function gradientColors(colors: ColorName[]): [string, string, string] {
+  const picked = [...new Set([...colors, ...GRADIENT_FALLBACK])].slice(0, 3);
+  return [HEX[picked[0]], HEX[picked[1]], HEX[picked[2]]];
+}
+
 /** Stable color for a name, so a new tag always gets the same color. */
 export function colorForName(name: string): ColorName {
   let hash = 0;
