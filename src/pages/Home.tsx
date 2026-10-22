@@ -1,8 +1,10 @@
 import clsx from 'clsx';
-import { BookmarkPlus, Clock, Folder, Inbox, Library, SearchX, Sparkles, Star } from 'lucide-react';
-import { useCallback, useMemo, useState, type ReactNode } from 'react';
+import { BookmarkPlus, Clock, Folder, Inbox, Library, SearchX, Sparkles, SquareCheck, Star } from 'lucide-react';
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import BookmarkCard from '../components/BookmarkCard';
+import BulkBar from '../components/BulkBar';
+import DetailDrawer from '../components/DetailDrawer';
 import EmptyState from '../components/EmptyState';
 import FilterBar from '../components/FilterBar';
 import { useLibrary } from '../context/library';
@@ -37,6 +39,10 @@ export default function Home() {
   const { viewMode, openEditor, toast } = useUI();
   const [params, setParams] = useSearchParams();
   const [loadingSample, setLoadingSample] = useState(false);
+  const [selected, setSelected] = useState<Set<number>>(new Set());
+  const [selectMode, setSelectMode] = useState(false);
+  const [detailsId, setDetailsId] = useState<number | null>(null);
+  const lastSelected = useRef<number | null>(null);
 
   const filters = useMemo(() => parseFilters(params), [params]);
   const update = useCallback(
@@ -55,6 +61,52 @@ export default function Home() {
         : sortBookmarks(scoped, filters.sort).map((bookmark) => ({ bookmark, match: undefined })),
     [scoped, query, filters.sort],
   );
+
+  // ----- selection (click a checkbox; shift+click selects a range)
+  const visibleIds = useMemo(() => results.map((r) => r.bookmark.id), [results]);
+  const selecting = selectMode || selected.size > 0;
+
+  const clearSelection = useCallback(() => {
+    setSelected(new Set());
+    setSelectMode(false);
+    lastSelected.current = null;
+  }, []);
+
+  const onSelect = (id: number, shiftKey: boolean) => {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      const anchor = lastSelected.current;
+      if (shiftKey && anchor !== null && visibleIds.includes(anchor)) {
+        const [a, b] = [visibleIds.indexOf(anchor), visibleIds.indexOf(id)].sort((x, y) => x - y);
+        visibleIds.slice(a, b + 1).forEach((v) => next.add(v));
+      } else if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+    lastSelected.current = id;
+  };
+
+  // Drop selections that disappeared (deleted elsewhere, or filtered out).
+  useEffect(() => {
+    setSelected((prev) => {
+      const visible = new Set(visibleIds);
+      const next = new Set([...prev].filter((id) => visible.has(id)));
+      return next.size === prev.size ? prev : next;
+    });
+  }, [visibleIds]);
+
+  // Escape clears the selection when no dialog is open.
+  useEffect(() => {
+    if (!selecting) return;
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && !document.querySelector('[aria-modal="true"]')) clearSelection();
+    };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [selecting, clearSelection]);
 
   const toggleTag = (name: string) =>
     update({ tags: filters.tags.includes(name) ? filters.tags.filter((t) => t !== name) : [...filters.tags, name], untagged: false });
@@ -153,6 +205,10 @@ export default function Home() {
         match={match}
         activeTags={filters.tags}
         onTagClick={toggleTag}
+        selected={selected.has(bookmark.id)}
+        selecting={selecting}
+        onSelect={onSelect}
+        onDetails={(b) => setDetailsId(b.id)}
       />
     ));
     body =
@@ -178,12 +234,43 @@ export default function Home() {
               <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">{summary}</p>
             )}
           </div>
+          {results.length > 0 && (
+            <button
+              className={clsx('btn-secondary', selecting && 'border-indigo-300 text-indigo-700 dark:border-indigo-500/50 dark:text-indigo-300')}
+              onClick={() => (selecting ? clearSelection() : setSelectMode(true))}
+              aria-pressed={selecting}
+            >
+              <SquareCheck className="size-4" />
+              {selecting ? 'Done' : 'Select'}
+            </button>
+          )}
         </div>
         {!loading && library.bookmarks.length > 0 && (
           <FilterBar filters={filters} onChange={update} library={library} searching={!!query} />
         )}
       </div>
       {body}
+      {selected.size > 0 && <div className="h-16" aria-hidden />}
+
+      {selected.size > 0 && (
+        <BulkBar
+          selected={[...selected]}
+          visibleIds={visibleIds}
+          onSelectAll={() => setSelected(new Set(visibleIds))}
+          onClear={clearSelection}
+        />
+      )}
+      {detailsId !== null && (
+        <DetailDrawer
+          bookmarkId={detailsId}
+          onClose={() => setDetailsId(null)}
+          onNavigate={setDetailsId}
+          onTagClick={(name) => {
+            setDetailsId(null);
+            update({ tags: [name], untagged: false });
+          }}
+        />
+      )}
     </div>
   );
 }

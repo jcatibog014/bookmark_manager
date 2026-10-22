@@ -3,8 +3,37 @@ import { X } from 'lucide-react';
 import { useEffect, useRef, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 
-// Only the top-most open modal reacts to Escape.
+// Only the top-most open dialog reacts to Escape.
 const openStack: symbol[] = [];
+
+/** Escape-to-close (top-most dialog only) and focus handling shared by Modal and Drawer. */
+export function useDialog(onClose: () => void) {
+  const panelRef = useRef<HTMLDivElement>(null);
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
+
+  useEffect(() => {
+    const me = Symbol('dialog');
+    openStack.push(me);
+    const previouslyFocused = document.activeElement as HTMLElement | null;
+    if (!panelRef.current?.contains(document.activeElement)) panelRef.current?.focus();
+
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && openStack[openStack.length - 1] === me) {
+        event.preventDefault();
+        onCloseRef.current();
+      }
+    };
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('keydown', onKey);
+      openStack.splice(openStack.indexOf(me), 1);
+      if (previouslyFocused?.isConnected) previouslyFocused.focus();
+    };
+  }, []);
+
+  return panelRef;
+}
 
 interface ModalProps {
   title?: ReactNode;
@@ -30,29 +59,7 @@ export default function Modal({
   position = 'center',
   hideClose,
 }: ModalProps) {
-  const panelRef = useRef<HTMLDivElement>(null);
-  const onCloseRef = useRef(onClose);
-  onCloseRef.current = onClose;
-
-  useEffect(() => {
-    const me = Symbol('modal');
-    openStack.push(me);
-    const previouslyFocused = document.activeElement as HTMLElement | null;
-    if (!panelRef.current?.contains(document.activeElement)) panelRef.current?.focus();
-
-    const onKey = (event: KeyboardEvent) => {
-      if (event.key === 'Escape' && openStack[openStack.length - 1] === me) {
-        event.preventDefault();
-        onCloseRef.current();
-      }
-    };
-    document.addEventListener('keydown', onKey);
-    return () => {
-      document.removeEventListener('keydown', onKey);
-      openStack.splice(openStack.indexOf(me), 1);
-      previouslyFocused?.focus?.();
-    };
-  }, []);
+  const panelRef = useDialog(onClose);
 
   return createPortal(
     <div

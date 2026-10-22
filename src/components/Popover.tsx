@@ -5,11 +5,13 @@ interface PopoverProps {
   trigger: (props: { open: boolean; toggle: () => void }) => ReactNode;
   children: ReactNode | ((close: () => void) => ReactNode);
   align?: 'left' | 'right';
+  /** Open upward, e.g. from a bar pinned to the bottom of the screen. */
+  side?: 'bottom' | 'top';
   className?: string;
 }
 
 /** A small dropdown panel that closes on outside click or Escape. */
-export default function Popover({ trigger, children, align = 'left', className }: PopoverProps) {
+export default function Popover({ trigger, children, align = 'left', side = 'bottom', className }: PopoverProps) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   const close = () => setOpen(false);
@@ -36,8 +38,9 @@ export default function Popover({ trigger, children, align = 'left', className }
       {open && (
         <div
           className={clsx(
-            'absolute z-20 mt-2 animate-pop-in rounded-2xl border border-zinc-200 bg-white p-4 shadow-xl shadow-zinc-950/10 dark:border-zinc-800 dark:bg-zinc-900',
+            'absolute z-20 animate-pop-in rounded-2xl border border-zinc-200 bg-white p-4 shadow-xl shadow-zinc-950/10 dark:border-zinc-800 dark:bg-zinc-900',
             align === 'right' ? 'right-0' : 'left-0',
+            side === 'top' ? 'bottom-full mb-2' : 'mt-2',
             className,
           )}
         >
