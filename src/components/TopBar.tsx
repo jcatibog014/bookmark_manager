@@ -1,10 +1,18 @@
 import { Menu, PanelLeft, Plus, Search } from 'lucide-react';
+import { useLocation } from 'react-router-dom';
 import { useUI } from '../context/ui';
 import ThemeToggle from './ThemeToggle';
 import ViewToggle from './ViewToggle';
 
 export default function TopBar() {
-  const { setSidebarOpen, toggleSidebarCollapsed } = useUI();
+  const { setSidebarOpen, toggleSidebarCollapsed, openEditor } = useUI();
+  const location = useLocation();
+
+  // When viewing a collection, new bookmarks go into it by default.
+  const addBookmark = () => {
+    const collection = Number(new URLSearchParams(location.search).get('collection'));
+    openEditor({ collectionId: location.pathname === '/' && collection > 0 ? collection : null });
+  };
 
   return (
     <header className="sticky top-0 z-30 flex h-16 shrink-0 items-center gap-2 border-b border-zinc-200 bg-white/70 px-4 backdrop-blur-md sm:gap-3 dark:border-zinc-800 dark:bg-zinc-950/70">
@@ -23,7 +31,7 @@ export default function TopBar() {
       <div className="ml-auto flex items-center gap-1 sm:gap-2">
         <ViewToggle />
         <ThemeToggle />
-        <button className="btn-primary">
+        <button className="btn-primary" onClick={addBookmark}>
           <Plus className="size-4" />
           <span className="hidden sm:inline">Add bookmark</span>
         </button>

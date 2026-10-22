@@ -1,8 +1,12 @@
 import { Outlet } from 'react-router-dom';
+import { useUI } from '../context/ui';
+import BookmarkForm from './BookmarkForm';
 import Sidebar from './Sidebar';
+import Toaster from './Toaster';
 import TopBar from './TopBar';
 
 export default function Layout() {
+  const { editor } = useUI();
   return (
     <div className="flex h-dvh overflow-hidden">
       <Sidebar />
@@ -12,6 +16,8 @@ export default function Layout() {
           <Outlet />
         </main>
       </div>
+      {editor && <BookmarkForm key={editor.key} editor={editor} />}
+      <Toaster />
     </div>
   );
 }
