@@ -14,7 +14,7 @@ interface TagInputProps {
   autoFocus?: boolean;
 }
 
-/** Chip-style tag editor: type and press Enter or comma; pick from existing tags with the arrow keys. */
+/** Chip-style tag editor: type and press Enter or comma; suggestions appear while typing (or press ↓). */
 export default function TagInput({ value, onChange, suggestions, id, placeholder, autoFocus }: TagInputProps) {
   const [text, setText] = useState('');
   const [open, setOpen] = useState(false);
@@ -40,11 +40,16 @@ export default function TagInput({ value, onChange, suggestions, id, placeholder
     if (name && !value.includes(name)) onChange([...value, name]);
     setText('');
     setHighlight(-1);
+    setOpen(false); // reopens on typing or ↓, so it doesn't cover the form
   };
 
   const onKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
     const showing = open && matches.length > 0;
-    if (event.key === 'ArrowDown' && showing) {
+    if (event.key === 'ArrowDown' && !showing && matches.length > 0) {
+      event.preventDefault();
+      setOpen(true);
+      setHighlight(0);
+    } else if (event.key === 'ArrowDown' && showing) {
       event.preventDefault();
       setHighlight((h) => (h + 1) % matches.length);
     } else if (event.key === 'ArrowUp' && showing) {
@@ -91,7 +96,6 @@ export default function TagInput({ value, onChange, suggestions, id, placeholder
             setHighlight(-1);
           }}
           onKeyDown={onKeyDown}
-          onFocus={() => setOpen(true)}
           onBlur={() => {
             setOpen(false);
             if (text.trim()) add(text);

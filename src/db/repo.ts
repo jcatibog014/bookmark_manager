@@ -328,6 +328,17 @@ export async function importItems(items: ImportItem[]): Promise<ImportReport> {
   return report;
 }
 
+/** Restores tag/collection colors from a backup file. */
+export async function applyColors(
+  tagColors: Map<string, ColorName>,
+  collectionColors: Map<string, ColorName>,
+): Promise<void> {
+  await db.transaction('rw', db.tags, db.collections, async () => {
+    for (const [name, color] of tagColors) await db.tags.where('name').equals(normalizeTagName(name)).modify({ color });
+    for (const [name, color] of collectionColors) await db.collections.where('name').equalsIgnoreCase(name).modify({ color });
+  });
+}
+
 export async function clearAllData(): Promise<void> {
   await db.transaction('rw', ALL_TABLES(), async () => {
     await Promise.all(ALL_TABLES().map((table) => table.clear()));

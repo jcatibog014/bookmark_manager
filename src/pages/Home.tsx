@@ -73,9 +73,11 @@ export default function Home() {
   }, []);
 
   const onSelect = (id: number, shiftKey: boolean) => {
+    // Read the anchor now: the state updater below runs later, after the ref is updated.
+    const anchor = lastSelected.current;
+    lastSelected.current = id;
     setSelected((prev) => {
       const next = new Set(prev);
-      const anchor = lastSelected.current;
       if (shiftKey && anchor !== null && visibleIds.includes(anchor)) {
         const [a, b] = [visibleIds.indexOf(anchor), visibleIds.indexOf(id)].sort((x, y) => x - y);
         visibleIds.slice(a, b + 1).forEach((v) => next.add(v));
@@ -86,7 +88,6 @@ export default function Home() {
       }
       return next;
     });
-    lastSelected.current = id;
   };
 
   // Drop selections that disappeared (deleted elsewhere, or filtered out).

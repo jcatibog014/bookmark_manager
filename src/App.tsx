@@ -1,11 +1,14 @@
+import { lazy } from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import Layout from './components/Layout';
 import { LibraryProvider } from './context/library';
 import { UIProvider } from './context/ui';
-import Collections from './pages/Collections';
 import Home from './pages/Home';
-import Settings from './pages/Settings';
-import Tags from './pages/Tags';
+
+// Secondary pages load on demand to keep the first load small.
+const Tags = lazy(() => import('./pages/Tags'));
+const Collections = lazy(() => import('./pages/Collections'));
+const Settings = lazy(() => import('./pages/Settings'));
 
 export default function App() {
   return (

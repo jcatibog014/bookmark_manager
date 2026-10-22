@@ -5,6 +5,7 @@ import {
   Clock,
   Folder,
   Inbox,
+  Keyboard,
   Library,
   Plus,
   Settings,
@@ -111,7 +112,7 @@ function NewCollectionRow({ onDone }: { onDone: () => void }) {
 }
 
 export default function Sidebar() {
-  const { sidebarOpen, setSidebarOpen, sidebarCollapsed } = useUI();
+  const { sidebarOpen, setSidebarOpen, sidebarCollapsed, setHelpOpen } = useUI();
   const { library } = useLibrary();
   const [creating, setCreating] = useState(false);
   const location = useLocation();
@@ -196,6 +197,17 @@ export default function Sidebar() {
 
       <div className="mt-auto flex flex-col gap-0.5 border-t border-zinc-200 pt-4 dark:border-zinc-800">
         <NavItem to="/settings" icon={<Settings className="size-4 shrink-0" />} label="Settings" active={location.pathname === '/settings'} />
+        <button
+          onClick={() => {
+            setSidebarOpen(false);
+            setHelpOpen(true);
+          }}
+          className="flex items-center gap-3 rounded-xl px-3 py-1.5 text-sm font-medium text-zinc-600 transition hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800/70 dark:hover:text-zinc-100"
+        >
+          <Keyboard className="size-4 shrink-0" />
+          <span className="flex-1 text-left">Shortcuts</span>
+          <kbd className="kbd">?</kbd>
+        </button>
       </div>
     </div>
   );
