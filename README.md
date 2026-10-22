@@ -9,6 +9,11 @@ collections, star your favorites, and find anything in seconds with fuzzy search
 | --- | --- | --- |
 | ![Command palette](docs/screenshots/command-palette.png) | ![Duplicate detection](docs/screenshots/duplicate-detection.png) | ![Dark list view](docs/screenshots/home-dark-list.png) |
 
+<p align="center">
+  <img src="docs/screenshots/mobile.png" alt="Mobile layout" width="300"><br>
+  <em>Mobile layout</em>
+</p>
+
 ## Features
 
 **Saving links**
